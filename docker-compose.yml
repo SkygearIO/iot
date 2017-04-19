@@ -1,0 +1,50 @@
+version: '2'
+
+services:
+  app:
+    image: quay.io/skygeario/skygear-server:v0.22.2
+    networks:
+      - skygear
+    ports:
+      - "3000:3000"
+    command: skygear-server
+    environment:
+      DATABASE_URL: postgresql://postgres:@db/postgres?sslmode=disable
+      API_KEY: api-key
+      MASTER_KEY: master-key
+      APP_NAME: iot
+      PLUGINS: JS
+      JS_TRANSPORT: http
+      JS_PATH: http://plugin:9000
+      TOKEN_STORE: jwt
+      TOKEN_STORE_SECRET: jwt_secret
+
+  db:
+    image: mdillon/postgis:9.5
+    networks:
+      - skygear
+    ports:
+      - "5432:5432"
+
+  plugin:
+    image: node:6
+    working_dir: /usr/src/app
+    command: npm start
+    networks:
+      - skygear
+    expose:
+      - "9000"
+    volumes:
+      - .:/usr/src/app
+    environment:
+      DATABASE_URL: postgres://postgres@db/postgres?sslmode=disable
+      API_KEY: api-key
+      MASTER_KEY: master-key
+      APP_NAME: iot
+      PUBSUB_URL: ws://app:3000/pubsub
+      SKYGEAR_ENDPOINT: http://app:3000
+      HTTP: "true"
+
+networks:
+  skygear:
+    driver: bridge
