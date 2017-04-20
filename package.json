@@ -1,7 +1,7 @@
 {
   "name": "iot",
-  "version": "0.0.1",
-  "main": "src/index.js",
+  "version": "0.0.2",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SkygearIO/iot.git"

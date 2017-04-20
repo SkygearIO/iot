@@ -1,5 +1,5 @@
 
-const {lambda} = require('./helper.js');
+const {lambda} = require('./src/helper.js');
 
 const {
   setupDatabase,
@@ -8,7 +8,7 @@ const {
   logDeviceMessage,
   saveDeviceStatus,
   publishDeviceEvent,
-} = require('./handler.js');
+} = require('./src/handler.js');
 
 module.exports = {
   includeme(skygearCloud) {
