@@ -9,7 +9,7 @@
   "author": "akiroz",
   "license": "Apache-2.0",
   "dependencies": {
-    "skygear": "^0.22.2",
+    "skygear": "^0.23.0",
     "ws": "^2.2.3"
   },
   "scripts": {
