@@ -37,20 +37,21 @@ There are 2 Skygera IoT specific roles:
 
 ## Database Schema
 
-* `iot_device`  (ACL: public = no, iot-manager = rw)
+* `iot_device`  (ACL: public = no, iot-manager/device = rw)
     * _id (skygear user id)
     * secret (string)
     * class (string)
+    * login (FK: `iot_device_login._id`)
+    * status (FK: `iot_device_status._id`)
     * active (bool, true unless the device has been de-registered)
 
-* `iot_device_login` (ACL: public = no, iot-manager = rw)
-    * deviceID (FK: `iot_device._id`)
+* `iot_device_login` (ACL: public = no, iot-manager/device = rw)
+    * deviceID (string)
     * sdkVersion (string)
     * appVersion (string)
 
-* `iot_device_status` (ACL: public = no, iot-manager = rw)
-    * deviceID (FK: `iot_device._id`)
-    * loginID (FK: `iot_device_login._id`)
+* `iot_device_status` (ACL: public = no, iot-manager/device = rw)
+    * deviceID (string)
     * status (online, offline)
     * metadata (JSON)
 
@@ -82,7 +83,7 @@ A device is online iff the latest `iot_device_status` record is created within X
 * `iot:add-device-role()` (requires `iot-device` role)
   * Adds the role `iot-device` to the request user
 
-* `iot:report-status({deviceID: "", loginID: "", status: "online"})` (requires `iot-device` role)
+* `iot:report-status({deviceID: "", status: "online", metadata: {}})` (requires `iot-device` role)
   * Used by devices to report its current status
 
 * `iot:device-publish([deviceID, payload])` (requires master key OR `iot-manager` role)

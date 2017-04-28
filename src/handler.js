@@ -12,40 +12,34 @@ function setupDatabase(skygear) {
       'schema:create', {
         _from_plugin: true,
         record_types: {
+          iot_device_login: {
+            fields: [
+              {name: 'deviceID'   , type: 'string'},
+              {name: 'sdkVersion' , type: 'string'},
+              {name: 'appVersion' , type: 'string'},
+            ]
+          },
+          iot_device_status: {
+            fields: [
+              {name: 'deviceID' , type: 'string'},
+              {name: 'status'   , type: 'string'},
+              {name: 'metadata' , type: 'json'},
+            ]
+          }
+        }
+      }
+    ))
+    .then(_ => skygear.sendRequestObject(
+      'schema:create', {
+        _from_plugin: true,
+        record_types: {
           iot_device: {
             fields: [
               {name: 'secret' , type: 'string'},
               {name: 'class'  , type: 'string'},
+              {name: 'login'  , type: 'ref(iot_device_login)'},
+              {name: 'status' , type: 'ref(iot_device_status)'},
               {name: 'active' , type: 'boolean'},
-            ]
-          }
-        }
-      }
-    ))
-    .then(_ => skygear.sendRequestObject(
-      'schema:create', {
-        _from_plugin: true,
-        record_types: {
-          iot_device_login: {
-            fields: [
-              {name: 'deviceID'   , type: 'ref(iot_device)'},
-              {name: 'sdkVersion' , type: 'string'},
-              {name: 'appVersion' , type: 'string'},
-            ]
-          }
-        }
-      }
-    ))
-    .then(_ => skygear.sendRequestObject(
-      'schema:create', {
-        _from_plugin: true,
-        record_types: {
-          iot_device_status: {
-            fields: [
-              {name: 'deviceID' , type: 'ref(iot_device)'},
-              {name: 'loginID'  , type: 'ref(iot_device_login)'},
-              {name: 'status'   , type: 'string'},
-              {name: 'metadata' , type: 'json'},
             ]
           }
         }
@@ -84,23 +78,27 @@ function saveDeviceStatus({
 }) {
   const statusRecord = new skygear.Record(
     'iot_device_status', {
-      deviceID: new skygear.Reference(
-        `iot_device/${statusReport.deviceID}`
-      ),
-      loginID:  new skygear.Reference(
-        `iot_device_login/${statusReport.loginID}`
-      ),
+      deviceID: statusReport.deviceID,
       status:   statusReport.status,
       metadata: statusReport.metadata,
     }
   );
-  statusRecord.setAccess(
-    new skygear.ACL([
-      {role: 'iot-manager', level: 'write'}
-    ])
+  const deviceRecord = new skygear.Record(
+    'iot_device', {
+      _id: `iot_device/${statusReport.deviceID}`,
+      status: new skygear.Reference(statusRecord)
+    }
   );
-  return skygear.publicDB.save(statusRecord)
-    .then(_ => ({result: 'OK'}));
+  const acl = new skygear.ACL([
+    {role: 'iot-device',  level: 'write'},
+    {role: 'iot-manager', level: 'write'}
+  ]);
+  statusRecord.setAccess(acl);
+  deviceRecord.setAccess(acl);
+  return skygear.publicDB.save([
+    statusReport,
+    deviceRecord
+  ]).then(_ => ({result: 'OK'}));
 }
 
 
