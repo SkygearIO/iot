@@ -1,6 +1,6 @@
 {
   "name": "iot",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -9,8 +9,7 @@
   "author": "akiroz",
   "license": "Apache-2.0",
   "dependencies": {
-    "skygear": "^0.23.0",
-    "ws": "^2.2.3"
+    "skygear": "^0.23.0"
   },
   "scripts": {
     "start": "skygear-node src/index.js"

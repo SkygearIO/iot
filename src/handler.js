@@ -1,7 +1,6 @@
 
 const crypto = require('crypto');
-const {query} = require('./helper.js');
-
+const { query } = require('./helper.js');
 
 function setupDatabase(skygear) {
   console.log('[Skygear IoT] Setting up DB schema...');
@@ -80,25 +79,20 @@ function saveDeviceStatus({
     'iot_device_status', {
       deviceID: statusReport.deviceID,
       status:   statusReport.status,
-      metadata: statusReport.metadata,
+      metadata: statusReport.metadata || {},
     }
   );
-  const deviceRecord = new skygear.Record(
-    'iot_device', {
-      _id: `iot_device/${statusReport.deviceID}`,
-      status: new skygear.Reference(statusRecord)
-    }
-  );
-  const acl = new skygear.ACL([
-    {role: 'iot-device',  level: 'write'},
-    {role: 'iot-manager', level: 'write'}
-  ]);
-  statusRecord.setAccess(acl);
-  deviceRecord.setAccess(acl);
-  return skygear.publicDB.save([
-    statusReport,
-    deviceRecord
-  ]).then(_ => ({result: 'OK'}));
+  statusRecord.setAccess(new skygear.ACL([
+    { role: 'iot-device', level: 'write' },
+    { role: 'iot-manager', level: 'read' },
+  ]));
+  return Promise.resolve()
+    .then(_ => skygear.publicDB.save(statusRecord))
+    .then(_ => query(
+      "UPDATE iot_device SET status = $1 WHERE _id = $2",
+      [statusRecord._id, statusRecord.deviceID]
+    ))
+    .then(_ => ({result: 'OK'}));
 }
 
 

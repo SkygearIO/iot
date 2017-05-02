@@ -1,5 +1,5 @@
 
-const {lambda} = require('./src/helper.js');
+const { lambda } = require('./src/helper.js');
 
 const {
   setupDatabase,
