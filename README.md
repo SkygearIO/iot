@@ -86,12 +86,15 @@ A device is online iff the latest `iot_device_status` record is created within X
 * `iot:report-status({deviceID: "", status: "online", metadata: {}})` (requires `iot-device` role)
   * Used by devices to report its current status
 
-* `iot:device-publish([deviceID, payload])` (requires master key OR `iot-manager` role)
-  * Publish messages to device's secure channels, payloads must be an object with at least an "action" key.
+* `iot:device-publish([payload, deviceIDs])` (requires master key OR `iot-manager` role)
+  * Publish messages to devices' secure channels, payloads must be an object with at least an "action" key.
     All actions prefixed with `iot-` will be executed by the device platform (supplied by the device `platform.action` map)
+  * payload: object, (see `iot-<SHA256(deviceSecret)>` channel above)
+  * deviceIDs: array of device ID
 
 * `iot:log(message)` (requires `iot-device` role)
   * Logs message to the skygear portal
+  * message: string
 
 
 [sdk-src]: https://github.com/SkygearIO/iot-sdk-js

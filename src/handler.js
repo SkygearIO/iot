@@ -98,14 +98,23 @@ function saveDeviceStatus({
 
 function publishDeviceEvent({
   skygear,
-  req: {args: [deviceID, data]}
+  req: {args: [payload, deviceIDs]}
 }) {
-  return query("SELECT secret FROM iot_device WHERE _id = $1", [deviceID])
-    .then(result => {
-      const secretHash = crypto.createHash('sha256');
-      secretHash.update(result.rows[0].secret);
-      const channel = 'iot-' + secretHash.digest('hex');
-      skygear.pubsub.publish(channel, data);
+  return Promise.resolve()
+    .then(_ => {
+      return skygear.publicDB.query(
+        new skygear.Query(
+          new skygear.Record.extend('iot_device')
+        ).contains('_id', deviceIDs)
+      );
+    })
+    .then(results => {
+      results.forEach(({ secret }) => {
+        const secretHash = crypto.createHash('sha256');
+        secretHash.update(secret);
+        const channel = `iot-${secretHash.digest('hex')}`;
+        skygear.pubsub.publish(channel, payload);
+      });
     })
     .then(_ => ({result: 'OK'}));
 }
