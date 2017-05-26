@@ -80,7 +80,7 @@ A device is online iff the latest `iot_device_status` record is created within X
 
 ## Lambda
 
-* `iot:add-device-role()` (requires `iot-device` role)
+* `iot:add-device-role()`
   * Adds the role `iot-device` to the request user
 
 * `iot:report-status({deviceID: "", status: "online", metadata: {}})` (requires `iot-device` role)
