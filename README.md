@@ -68,6 +68,7 @@ A device is online iff the latest `iot_device_status` record is created within X
 * `iot-<SHA256(deviceSecret)>`
     A secure channel for the server to send messages to a device, payload must be an object with atleast 1 key: "action".
     Users should use these channels via the `iot:device-publish` lambda.
+    All actions prefixed with `iot-` will be executed by the device platform (supplied by the device `platform.action` map).
     Some pre-defined actions are:
     * `iot-shutdown`
     * `iot-restart`
@@ -88,7 +89,6 @@ A device is online iff the latest `iot_device_status` record is created within X
 
 * `iot:device-publish([payload, deviceIDs])` (requires master key OR `iot-manager` role)
   * Publish messages to devices' secure channels, payloads must be an object with at least an "action" key.
-    All actions prefixed with `iot-` will be executed by the device platform (supplied by the device `platform.action` map)
   * payload: object, (see `iot-<SHA256(deviceSecret)>` channel above)
   * deviceIDs: array of device ID
 
