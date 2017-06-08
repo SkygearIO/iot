@@ -1,5 +1,5 @@
 
-const { lambda } = require('./src/helper.js');
+const { registerLambda } = require('./src/helper.js');
 
 const {
   setupDatabase,
@@ -18,21 +18,23 @@ module.exports = {
     skygear.pubsub.reconfigure();
 
     skygearCloud.event('before-plugins-ready', _ => {
-      return setupDatabase(skygear);
+      return setupDatabase(skygearCloud, skygear);
     });
 
     skygearCloud.every('@every 10m', _ => {
       return publishRequestStatus(skygear);
     });
 
-    lambda(
+    registerLambda(
+      skygearCloud,
       'iot:add-device-role', {
         userRequired: true,
       },
       addDeviceRole
     );
 
-    lambda(
+    registerLambda(
+      skygearCloud,
       'iot:log', {
         userRequired: true,
         roleRequired: 'iot-device'
@@ -40,7 +42,8 @@ module.exports = {
       logDeviceMessage
     );
 
-    lambda(
+    registerLambda(
+      skygearCloud,
       'iot:report-status', {
         userRequired: true,
         roleRequired: 'iot-device',
@@ -49,7 +52,8 @@ module.exports = {
       saveDeviceStatus
     );
 
-    lambda(
+    registerLambda(
+      skygearCloud,
       'iot:device-publish', {
         authRequired: true,
         roleRequired: 'iot-manager',
@@ -60,5 +64,3 @@ module.exports = {
 
   }
 };
-
-

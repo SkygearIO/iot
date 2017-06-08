@@ -1,15 +1,12 @@
-
-const skygearCloud = require('skygear/cloud');
-
 /**
- * Database query helper, returns promise of result.
+ * Database operation helper, returns promise of result.
  */
-function query(stmt, data = []) {
+function dbOperation(skygearCloud, stmt, data = []) {
   return new Promise((resolve, reject) => {
     skygearCloud.poolConnect((err, client, done) => {
       if(err) reject(err);
       client.query(stmt, data, (err, result) => {
-        done(err);  
+        done(err);
         if(err) reject(err);
         else    resolve(result);
       });
@@ -27,7 +24,7 @@ function query(stmt, data = []) {
  * expects the role name (string).
  *
  */
-function lambda(endpoint, options, handler) {
+function registerLambda(skygearCloud, endpoint, options, handler) {
   const {
     inject = {},
     roleRequired,
@@ -38,7 +35,8 @@ function lambda(endpoint, options, handler) {
       return Promise.resolve()
         .then(_ => {
           if(roleRequired && req.api_key !== skygearCloud.settings.masterKey) {
-            return query(
+            return dbOperation(
+              skygearCloud,
               'SELECT 1 FROM _user_role WHERE user_id = $1 AND role_id = $2',
               [opt.context && opt.context.user_id, roleRequired]
             );
@@ -50,12 +48,11 @@ function lambda(endpoint, options, handler) {
           }
         })
         .then(_ => {
-          return handler(Object.assign(inject, {req, opt}));
+          return handler(Object.assign({skygearCloud}, inject, {req, opt}));
         });
     },
     options
   );
 }
 
-module.exports = {query, lambda};
-
+module.exports = {dbOperation, registerLambda};

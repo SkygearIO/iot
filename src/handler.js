@@ -1,12 +1,12 @@
 
 const crypto = require('crypto');
-const { query } = require('./helper.js');
+const { dbOperation } = require('./helper.js');
 
-function setupDatabase(skygear) {
+function setupDatabase(skygearCloud, skygear) {
   console.log('[Skygear IoT] Setting up DB schema...');
   return Promise.resolve()
-    .then(_ => query("INSERT INTO _role VALUES ('iot-device') ON CONFLICT DO NOTHING;"))
-    .then(_ => query("INSERT INTO _role VALUES ('iot-manager') ON CONFLICT DO NOTHING;"))
+    .then(_ => dbOperation(skygearCloud, "INSERT INTO _role VALUES ('iot-device') ON CONFLICT DO NOTHING;"))
+    .then(_ => dbOperation(skygearCloud, "INSERT INTO _role VALUES ('iot-manager') ON CONFLICT DO NOTHING;"))
     .then(_ => skygear.sendRequestObject(
       'schema:create', {
         _from_plugin: true,
@@ -53,9 +53,10 @@ function publishRequestStatus(skygear) {
 }
 
 
-function addDeviceRole({opt: {context: {user_id: deviceID}}}) {
+function addDeviceRole({skygearCloud, opt: {context: {user_id: deviceID}}}) {
   // TODO: validate that client is a device using API key when possible
-  return query(
+  return dbOperation(
+    skygearCloud,
     "INSERT INTO _user_role VALUES ($1, 'iot-device') ON CONFLICT DO NOTHING;",
     [deviceID]
   ).then(_ => ({result: 'OK'}));
@@ -63,6 +64,7 @@ function addDeviceRole({opt: {context: {user_id: deviceID}}}) {
 
 
 function logDeviceMessage({
+  skygearCloud,
   req: {args: message},
   opt: {context: {user_id: deviceID}}
 }) {
@@ -72,6 +74,7 @@ function logDeviceMessage({
 
 
 function saveDeviceStatus({
+  skygearCloud,
   skygear,
   req: {args: statusReport}
 }) {
@@ -88,7 +91,8 @@ function saveDeviceStatus({
   ]));
   return Promise.resolve()
     .then(_ => skygear.publicDB.save(statusRecord))
-    .then(_ => query(
+    .then(_ => dbOperation(
+      skygearCloud,
       "UPDATE iot_device SET status = $1 WHERE _id = $2",
       [statusRecord._id, statusRecord.deviceID]
     ))
@@ -128,4 +132,3 @@ module.exports = {
   saveDeviceStatus,
   publishDeviceEvent,
 };
-
