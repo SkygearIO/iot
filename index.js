@@ -15,7 +15,6 @@ module.exports = {
     const skygear = new skygearCloud.CloudCodeContainer();
     skygear.endPoint = skygearCloud.settings.skygearEndpoint+'/';
     skygear.apiKey = skygearCloud.settings.masterKey;
-    skygear.pubsub.reconfigure();
 
     skygearCloud.event('before-plugins-ready', _ => {
       return setupDatabase(skygearCloud, skygear);
