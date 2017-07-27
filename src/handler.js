@@ -7,7 +7,7 @@ function setupDatabase(skygearCloud, skygear) {
   return Promise.resolve()
     .then(_ => dbOperation(skygearCloud, "INSERT INTO _role VALUES ('iot-device') ON CONFLICT DO NOTHING;"))
     .then(_ => dbOperation(skygearCloud, "INSERT INTO _role VALUES ('iot-manager') ON CONFLICT DO NOTHING;"))
-    .then(_ => skygear.sendRequestObject(
+    .then(_ => skygear.makeRequest(
       'schema:create', {
         _from_plugin: true,
         record_types: {
@@ -28,7 +28,7 @@ function setupDatabase(skygearCloud, skygear) {
         }
       }
     ))
-    .then(_ => skygear.sendRequestObject(
+    .then(_ => skygear.makeRequest(
       'schema:create', {
         _from_plugin: true,
         record_types: {
