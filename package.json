@@ -9,9 +9,9 @@
   "author": "akiroz",
   "license": "Apache-2.0",
   "dependencies": {
-    "skygear": "^0.23.0"
+    "skygear": "1.1.0-alpha.1"
   },
   "scripts": {
-    "start": "skygear-node src/index.js"
+    "start": "skygear-node index.js"
   }
 }
